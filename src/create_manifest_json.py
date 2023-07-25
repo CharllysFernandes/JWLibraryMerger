@@ -5,30 +5,30 @@ import os
 
 def create_update_manifest_file(merged_dir):
     """
-    Cria ou atualiza o arquivo "manifest.json" com os dados fornecidos na pasta "merged".
+    Create or update the "manifest.json" file with the provided data in the "merged" folder.
 
-    Esta função recebe o caminho para a pasta "merged" e realiza o seguinte:
-    - Cria um objeto de dicionário contendo os dados para o arquivo "manifest.json".
-    - Obtém o nome do dispositivo em que o código está sendo executado.
-    - Obtém a data e hora atual em formato ISO (UTC).
-    - Escreve o conteúdo do dicionário no arquivo "manifest.json" com uma formatação indentada.
+    This function receives the path to the "merged" folder and performs the following:
+    - Creates a dictionary object containing the data for the "manifest.json" file.
+    - Retrieves the name of the device on which the code is being executed.
+    - Gets the current date and time in ISO format (UTC).
+    - Writes the dictionary content to the "manifest.json" file with indented formatting.
 
-    Parâmetros:
-        merged_dir (str): Caminho para a pasta "merged" onde o arquivo "manifest.json" será criado ou atualizado.
+    Parameters:
+        merged_dir (str): Path to the "merged" folder where the "manifest.json" file will be created or updated.
 
-    Retorna:
-        Nada. A função apenas cria ou atualiza o arquivo "manifest.json" na pasta "merged".
+    Returns:
+        None. The function only creates or updates the "manifest.json" file in the "merged" folder.
     """
-    # Caminho completo para o arquivo "manifest.json" na pasta "merged"
+    # Complete file path for the "manifest.json" file in the "merged" folder
     file_path = os.path.join(merged_dir, "manifest.json")
 
-    # Obter o nome do dispositivo
+    # Get the name of the device
     device_name = socket.gethostname()
 
-    # Obtém a data e hora atual em formato ISO (UTC)
+    # Get the current date and time in ISO format (UTC)
     current_datetime = datetime.datetime.now().isoformat()
 
-    # Dados para o arquivo "manifest.json"
+    # Data for the "manifest.json" file
     manifest_data = {
         "name": "Playlist_Merged.jwlibrary",
         "creationDate": current_datetime,
@@ -44,11 +44,11 @@ def create_update_manifest_file(merged_dir):
     }
 
     try:
-        # Escreve os dados no arquivo "manifest.json" com formatação indentada
+        # Write the data to the "manifest.json" file with indented formatting
         with open(file_path, 'w') as json_file:
             json.dump(manifest_data, json_file, indent=4)
 
-        print("Arquivo manifest.json criado e atualizado com sucesso!")
+        print("manifest.json file created and updated successfully!")
 
     except Exception as e:
-        print(f"Erro ao criar ou atualizar o arquivo manifest.json: {e}")
+        print(f"Error creating or updating the manifest.json file: {e}")

@@ -3,46 +3,46 @@ import os
 
 def insert_into_playlist_item_accuracy(database_path):
     """
-    Insere os dados na tabela PlaylistItemAccuracy do banco de dados especificado.
+    Insert data into the PlaylistItemAccuracy table of the specified database.
 
-    Parâmetros:
-        database_path (str): O caminho para o arquivo de banco de dados onde os dados serão inseridos.
+    Parameters:
+        database_path (str): The path to the database file where the data will be inserted.
 
-    Descrição:
-        A função conecta-se ao banco de dados especificado, em seguida, insere os dados na tabela PlaylistItemAccuracy.
-        Os dados são inseridos na coluna "PlaylistItemAccuracyId" e "Description" da tabela.
-        A função tenta inserir dois registros na tabela, representando duas descrições de acurácia: "Accurate" e "NeedsUserVerification".
-        A cláusula "INSERT OR IGNORE" é utilizada para evitar a inserção duplicada de dados já existentes.
-        Após a inserção dos dados, a função realiza o commit das alterações no banco de dados.
+    Description:
+        The function connects to the specified database and inserts data into the PlaylistItemAccuracy table.
+        The data is inserted into the "PlaylistItemAccuracyId" and "Description" columns of the table.
+        The function attempts to insert two records into the table, representing two accuracy descriptions: "Accurate" and "NeedsUserVerification".
+        The "INSERT OR IGNORE" clause is used to avoid the duplicate insertion of existing data.
+        After inserting the data, the function commits the changes to the database.
 
-    Observação:
-        A tabela PlaylistItemAccuracy deve existir no banco de dados fornecido, caso contrário, ocorrerá um erro.
+    Note:
+        The PlaylistItemAccuracy table must exist in the provided database; otherwise, an error will occur.
 
-    Exemplo de uso:
-        insert_into_playlist_item_accuracy("caminho_do_banco_de_dados.db")
+    Example of use:
+        insert_into_playlist_item_accuracy("database_file_path.db")
     """
-    # Combinar o caminho do banco de dados com o nome do arquivo "userData.db"
-    caminho_db_mesclado = os.path.join(database_path, "userData.db")
+    # Combine the database path with the name of the "userData.db" file
+    db_file_path = os.path.join(database_path, "userData.db")
 
-    # Conectar ao banco de dados
-    conn_mesclado = sqlite3.connect(caminho_db_mesclado)
+    # Connect to the database
+    conn = sqlite3.connect(db_file_path)
 
     try:
-        # Criar um cursor para executar comandos SQL no banco de dados
-        cursor_mesclado = conn_mesclado.cursor()
+        # Create a cursor to execute SQL commands on the database
+        cursor = conn.cursor()
 
-        # Inserir os dados na tabela PlaylistItemAccuracy
-        cursor_mesclado.execute("INSERT OR IGNORE INTO PlaylistItemAccuracy (PlaylistItemAccuracyId, Description) VALUES (?, ?)", (1, "Accurate"))
-        cursor_mesclado.execute("INSERT OR IGNORE INTO PlaylistItemAccuracy (PlaylistItemAccuracyId, Description) VALUES (?, ?)", (2, "NeedsUserVerification"))
+        # Insert data into the PlaylistItemAccuracy table
+        cursor.execute("INSERT OR IGNORE INTO PlaylistItemAccuracy (PlaylistItemAccuracyId, Description) VALUES (?, ?)", (1, "Accurate"))
+        cursor.execute("INSERT OR IGNORE INTO PlaylistItemAccuracy (PlaylistItemAccuracyId, Description) VALUES (?, ?)", (2, "NeedsUserVerification"))
 
-        # Confirmar as alterações realizadas no banco de dados
-        conn_mesclado.commit()
+        # Commit the changes made to the database
+        conn.commit()
 
-        print("Dados inseridos na tabela PlaylistItemAccuracy com sucesso.")
+        print("Data inserted into the PlaylistItemAccuracy table successfully.")
 
     except sqlite3.Error as e:
-        print(f"Erro ao inserir dados na tabela PlaylistItemAccuracy: {e}")
+        print(f"Error while inserting data into the PlaylistItemAccuracy table: {e}")
 
     finally:
-        # Fechar a conexão com o banco de dados
-        conn_mesclado.close()
+        # Close the connection with the database
+        conn.close()

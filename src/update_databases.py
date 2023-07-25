@@ -1,41 +1,44 @@
 import sqlite3
 
-def update_database(database, column_update, value_initial, value_update):
+def update_database(file_path_database, column_to_update, initial_value, updated_value):
     """
-    Atualiza registros em todas as tabelas de um banco de dados SQLite onde a coluna especificada
-    possui o valor inicial informado, substituindo-o pelo valor de atualização informado.
+    Update records in all tables of a SQLite database where the specified column
+    has the initial value provided, replacing it with the updated value.
 
-    Parâmetros:
-        database (str): Caminho para o arquivo do banco de dados SQLite a ser atualizado.
-        column_update (str): Nome da coluna a ser atualizada nas tabelas.
-        value_initial (str ou int): Valor inicial da coluna que será substituído.
-        value_update (str ou int): Novo valor que substituirá o valor inicial.
+    Parameters:
+        file_path_database (str): Path to the SQLite database file to be updated.
+        column_to_update (str): Name of the column to be updated in the tables.
+        initial_value (str or int): Initial value in the column to be replaced.
+        updated_value (str or int): New value that will replace the initial value.
 
-    Retorna:
-        Nada. A função apenas atualiza os registros no banco de dados.
+    Returns:
+        None. The function only updates the records in the database.
 
-    Exemplo de uso:
-        update_database("caminho_para_seu_banco_de_dados.db", "Nome", "AntigoValor", "NovoValor")
+    Example of use:
+        update_database("path_to_your_database.db", "Name", "OldValue", "NewValue")
     """
-    # Conectar ao banco de dados
-    conn = sqlite3.connect(database)
+    # Connect to the database
+    conn = sqlite3.connect(file_path_database)
     cursor = conn.cursor()
 
-    # Obter a lista de tabelas do banco de dados
+    # Get the list of tables in the database
     cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table';")
-    tabelas = cursor.fetchall()
+    tables = cursor.fetchall()
 
-    # Atualizar o registro em cada tabela que contém a coluna informada
-    for tabela in tabelas:
-        tabela = tabela[0]
+    # Update the record in each table that contains the specified column
+    for table in tables:
+        table = table[0]
+
         try:
-            cursor.execute(f"UPDATE {tabela} SET {column_update} = ? WHERE {column_update} = ?", (value_update, value_initial))
+            cursor.execute(f"UPDATE {table} SET {column_to_update} = ? WHERE {column_to_update} = ?", (updated_value, initial_value))
             conn.commit()
-            print(f"Registro: '{tabela}' - '{column_update}': {value_initial} -> {value_update}")
+            print(f"Record updated in '{table}' - '{column_to_update}': {initial_value} -> {updated_value}")
+
         except sqlite3.Error as e:
-            # print(f"Erro ao atualizar o registro em '{tabela}': {e}")
+            print(f"Error updating the record in '{table}': {e}")
             conn.rollback()
 
     cursor.close()
     conn.close()
-    print(f"{tabela} de {database} atualizada com sucesso!")
+
+    print(f"{table} in {file_path_database} updated successfully!")

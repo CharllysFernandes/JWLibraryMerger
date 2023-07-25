@@ -3,78 +3,72 @@ import os
 from .update_databases import update_database
 from .utils import random_id
 
-def merge_table_tag(pasta_db, pasta_mesclada):
+def merge_table_tag(db_folder_path, merged_folder_path):
     """
-    Mescla a tabela "Tag" de todos os bancos de dados encontrados na pasta DB
-    e une ao arquivo "userData.db" na pasta file_merged.
+    Merge the "Tag" table from all the databases found in the DB folder
+    and combine it with the "userData.db" file in the merged folder.
 
-    Para cada arquivo de banco de dados encontrado na pasta DB, esta função realiza o seguinte:
-    - Conecta-se ao "userData.db" na pasta mesclada.
-    - Cria a tabela "Tag" no banco de dados mesclado, caso ela ainda não exista.
-    - Lê os registros da tabela "Tag" no banco de dados atual.
-    - Verifica se cada registro já existe no banco de dados mesclado com base no valor da coluna "TagId".
-    - Caso o registro não exista no banco de dados mesclado, insere-o diretamente.
-    - Se o registro já existir no banco de dados mesclado, gera um novo número aleatório para o "TagId".
-      O novo "TagId" é concatenado ao valor original para evitar duplicações.
-      O registro é então atualizado com o novo "TagId" no banco de dados atual e inserido no banco de dados mesclado.
+    For each database file found in the DB folder, this function performs the following:
+    - Connects to the "userData.db" in the merged folder.
+    - Creates the "Tag" table in the merged database if it does not already exist.
+    - Reads the records from the "Tag" table in the current database.
+    - Checks if each record already exists in the merged database based on the value of the "TagId" column.
+    - If the record does not exist in the merged database, it is inserted directly.
+    - If the record already exists in the merged database, a new random number is generated for the "TagId".
+      The new "TagId" is concatenated with the original value to avoid duplications.
+      The record is then updated with the new "TagId" in the current database and inserted into the merged database.
 
-    Parâmetros:
-        pasta_db (str): Caminho para a pasta que contém os arquivos de banco de dados a serem mesclados.
-        pasta_mesclada (str): Caminho para a pasta onde o arquivo "userData.db" está localizado.
+    Parameters:
+        db_folder_path (str): Path to the folder containing the database files to be merged.
+        merged_folder_path (str): Path to the folder where the "userData.db" file is located.
 
-    Retorna:
-        Nada. A função apenas mescla os registros da tabela "Tag" em todos os bancos de dados.
+    Returns:
+        None. The function only merges the records from the "Tag" table in all the databases.
 
-    Exemplo de uso:
-        merge_table_tag("caminho_para_pasta_DB", "caminho_para_pasta_file_merged")
+    Example of use:
+        merge_table_tag("path_to_DB_folder", "path_to_merged_folder")
     """
-    # Conectar ao "userData.db" na pasta mesclada
-    caminho_db_mesclado = os.path.join(pasta_mesclada, "userData.db")
-    conn_mesclado = sqlite3.connect(caminho_db_mesclado)
-    cursor_mesclado = conn_mesclado.cursor()
+    # Connect to the "userData.db" in the merged folder
+    merged_db_path = os.path.join(merged_folder_path, "userData.db")
+    merged_conn = sqlite3.connect(merged_db_path)
+    merged_cursor = merged_conn.cursor()
 
-    # Criar a tabela "Tag" no banco de dados mesclado, caso ainda não exista
-    cursor_mesclado.execute("CREATE TABLE IF NOT EXISTS Tag (TagId INTEGER PRIMARY KEY, Type INTEGER, Name TEXT)")
+    # Create the "Tag" table in the merged database if it does not exist
+    merged_cursor.execute("CREATE TABLE IF NOT EXISTS Tag (TagId INTEGER PRIMARY KEY, Type TEXT, Name TEXT)")
 
-    for db_file in os.listdir(pasta_db):
+    for db_file in os.listdir(db_folder_path):
         if db_file.endswith(".db"):
-            caminho_db = os.path.join(pasta_db, db_file)
-            print(f"Conectando ao arquivo: {db_file}")
+            db_path = os.path.join(db_folder_path, db_file)
+            print(f"Connecting to file: {db_file}")
 
-            print(f"Checking database file: {caminho_db}")
-            if os.path.exists(caminho_db):
-                print("Database file exists.")
-            else:
-                print("Database file does not exist.")
-            # Conectar ao arquivo de banco de dados atual
-            conn = sqlite3.connect(caminho_db)
+            # Connect to the current database file
+            conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
 
-            # Ler os registros da tabela "Tag" no banco de dados atual
+            # Read the records from the "Tag" table in the current database
             cursor.execute("SELECT * FROM Tag")
             records = cursor.fetchall()
 
-            # Verificar se o registro já existe no banco de dados mesclado com base no valor da coluna "TagId"
+            # Check if the record already exists in the merged database based on the value of "TagId" column
             for record in records:
                 tag_id = record[0]
                 type_value = record[1]
                 name_value = record[2]
 
                 try:
-                    cursor_mesclado.execute("INSERT INTO Tag (TagId, Type, Name) VALUES (?, ?, ?)", (tag_id, type_value, name_value))
-                    conn_mesclado.commit()
+                    merged_cursor.execute("INSERT INTO Tag (TagId, Type, Name) VALUES (?, ?, ?)", (tag_id, type_value, name_value))
+                    merged_conn.commit()
                 except sqlite3.IntegrityError:
-                    print(f"Registro com TagId {tag_id} já existe no banco de dados mesclado. Gerando novo número aleatório...")
+                    print(f"Record with TagId {tag_id} already exists in the merged database. Generating a new random number...")
                     new_tag_id = f"{tag_id}{random_id()}"
-                    print(f"Novo valor para TagId: {new_tag_id}")
-                    update_database(caminho_db, "TagId", tag_id, new_tag_id)
-                    cursor_mesclado.execute("INSERT INTO Tag (TagId, Type, Name) VALUES (?, ?, ?)", (new_tag_id, type_value, name_value))
-                    conn_mesclado.commit()
+                    print(f"New value for TagId: {new_tag_id}")
+                    update_database(db_path, "TagId", tag_id, new_tag_id)
+                    merged_cursor.execute("INSERT INTO Tag (TagId, Type, Name) VALUES (?, ?, ?)", (new_tag_id, type_value, name_value))
+                    merged_conn.commit()
 
             cursor.close()
             conn.close()
+            print(f"Tag table merged successfully in {db_file}!")
 
-    cursor_mesclado.close()
-    conn_mesclado.close()
-    print(">>>>>>Tabela 'Tag' mesclada com sucesso!")
-
+    merged_cursor.close()
+    merged_conn.close()

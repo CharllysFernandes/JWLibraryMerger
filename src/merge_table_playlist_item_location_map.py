@@ -1,56 +1,56 @@
 import sqlite3
 import os
+
 from .update_databases import update_database
-from .merge_record_by_location_id import merge_record_by_location_id
 from .utils import random_id
 
-def merge_table_playlist_item_location_map(pasta_db, pasta_mesclada):
+def merge_table_playlist_item_location_map(db_folder, merged_folder):
     """
-    Mescla a tabela "PlaylistItemLocationMap" de todos os bancos de dados encontrados na pasta DB
-    e une ao arquivo "userData.db" na pasta file_merged.
+    Merge the 'PlaylistItemLocationMap' table from all the databases found in the 'db_folder'
+    and combine it with the 'userData.db' file in the 'merged_folder'.
 
-    Para cada arquivo de banco de dados encontrado na pasta DB, esta função realiza o seguinte:
-    - Conecta-se ao "userData.db" na pasta mesclada.
-    - Cria a tabela "PlaylistItemLocationMap" no banco de dados mesclado, caso ela ainda não exista.
-    - Lê os registros da tabela "PlaylistItemLocationMap" no banco de dados atual.
-    - Verifica se cada registro já existe no banco de dados mesclado com base nos valores das colunas "PlaylistItemId" e "LocationId".
-    - Caso o registro não exista no banco de dados mesclado, insere-o diretamente.
-    - Se o registro já existir no banco de dados mesclado, gera novos números aleatórios para "PlaylistItemId" e "LocationId".
-      Os novos valores são concatenados aos valores originais para evitar duplicações.
-      O registro é então atualizado com os novos valores no banco de dados atual e inserido no banco de dados mesclado.
+    For each database file found in the 'db_folder', this function performs the following steps:
+    - Connects to the 'userData.db' in the 'merged_folder'.
+    - Creates the 'PlaylistItemLocationMap' table in the merged database if it does not already exist.
+    - Reads the records from the 'PlaylistItemLocationMap' table in the current database.
+    - Checks if each record already exists in the merged database based on the values of the columns 'PlaylistItemId' and 'LocationId'.
+    - If the record does not exist in the merged database, it is inserted directly.
+    - If the record already exists in the merged database, new random numbers are generated for 'PlaylistItemId' and 'LocationId'.
+      The new values are concatenated to the original values to avoid duplicates.
+      The record is then updated with the new values in the current database and inserted into the merged database.
 
-    Parâmetros:
-        pasta_db (str): Caminho para a pasta que contém os arquivos de banco de dados a serem mesclados.
-        pasta_mesclada (str): Caminho para a pasta onde o arquivo "userData.db" está localizado.
+    Parameters:
+        db_folder (str): Path to the folder containing the database files to be merged.
+        merged_folder (str): Path to the folder where the "userData.db" file is located.
 
-    Retorna:
-        Nada. A função apenas mescla os registros da tabela "PlaylistItemLocationMap" em todos os bancos de dados.
+    Returns:
+        None. The function only merges the records of the "PlaylistItemLocationMap" table in all databases.
 
-    Exemplo de uso:
-        merge_table_playlist_item_location_map("caminho_para_pasta_DB", "caminho_para_pasta_file_merged")
+    Example of usage:
+        merge_table_playlist_item_location_map("path_to_db_folder", "path_to_merged_folder")
     """
-    # Conectar ao "userData.db" na pasta mesclada
-    caminho_db_mesclado = os.path.join(pasta_mesclada, "userData.db")
-    conn_mesclado = sqlite3.connect(caminho_db_mesclado)
-    cursor_mesclado = conn_mesclado.cursor()
+    # Connect to "userData.db" in the merged folder
+    merged_db_path = os.path.join(merged_folder, "userData.db")
+    merged_conn = sqlite3.connect(merged_db_path)
+    merged_cursor = merged_conn.cursor()
 
-    # Criar a tabela "PlaylistItemLocationMap" no banco de dados mesclado, caso ainda não exista
-    cursor_mesclado.execute("CREATE TABLE IF NOT EXISTS PlaylistItemLocationMap (PlaylistItemId INTEGER, LocationId INTEGER, MajorMultimediaType INTEGER, BaseDurationTicks INTEGER, PRIMARY KEY (PlaylistItemId, LocationId))")
+    # Create the "PlaylistItemLocationMap" table in the merged database if it does not exist
+    merged_cursor.execute("CREATE TABLE IF NOT EXISTS PlaylistItemLocationMap (PlaylistItemId INTEGER, LocationId INTEGER, MajorMultimediaType INTEGER, BaseDurationTicks INTEGER, PRIMARY KEY (PlaylistItemId, LocationId))")
 
-    for db_file in os.listdir(pasta_db):
+    for db_file in os.listdir(db_folder):
         if db_file.endswith(".db"):
-            caminho_db = os.path.join(pasta_db, db_file)
-            print(f"Conectando ao arquivo: {db_file}")
+            db_path = os.path.join(db_folder, db_file)
+            print(f"Connecting to file: {db_file}")
 
-            # Conectar ao arquivo de banco de dados atual
-            conn = sqlite3.connect(caminho_db)
+            # Connect to the current database file
+            conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
 
-            # Ler os registros da tabela "PlaylistItemLocationMap" no banco de dados atual
+            # Read the records from the "PlaylistItemLocationMap" table in the current database
             cursor.execute("SELECT * FROM PlaylistItemLocationMap")
             records = cursor.fetchall()
 
-            # Verificar se o registro já existe no banco de dados mesclado com base nos valores das colunas "PlaylistItemId" e "LocationId"
+            # Check if the record already exists in the merged database based on the values of "PlaylistItemId" and "LocationId" columns
             for record in records:
                 playlist_item_id = record[0]
                 location_id = record[1]
@@ -58,27 +58,25 @@ def merge_table_playlist_item_location_map(pasta_db, pasta_mesclada):
                 base_duration_ticks = record[3]
 
                 try:
-                    cursor_mesclado.execute("INSERT INTO PlaylistItemLocationMap (PlaylistItemId, LocationId, MajorMultimediaType, BaseDurationTicks) VALUES (?, ?, ?, ?)", (playlist_item_id, location_id, major_multimedia_type, base_duration_ticks))
+                    merged_cursor.execute("INSERT INTO PlaylistItemLocationMap (PlaylistItemId, LocationId, MajorMultimediaType, BaseDurationTicks) VALUES (?, ?, ?, ?)", (playlist_item_id, location_id, major_multimedia_type, base_duration_ticks))
 
-                    # merge_record_by_location_id(caminho_db, caminho_db_mesclado, location_id)
+                    # merge_record_by_location_id(db_path, merged_db_path, location_id)
 
-                    conn_mesclado.commit()
+                    merged_conn.commit()
                 except sqlite3.IntegrityError:
-                    print(f"Registro com PlaylistItemId {playlist_item_id} e LocationId {location_id} já existe no banco de dados mesclado. Gerando novos números aleatórios...")
+                    print(f"Record with PlaylistItemId {playlist_item_id} and LocationId {location_id} already exists in the merged database. Generating new random numbers...")
                     new_playlist_item_id = f"{playlist_item_id}{random_id()}"
                     new_location_id = f"{location_id}{random_id()}"
-                    print(f"Novos valores para PlaylistItemId: {new_playlist_item_id} e LocationId: {new_location_id}")
-                    update_database(caminho_db, "PlaylistItemId", playlist_item_id, new_playlist_item_id)
-                    update_database(caminho_db, "LocationId", location_id, new_location_id)
-                    cursor_mesclado.execute("INSERT INTO PlaylistItemLocationMap (PlaylistItemId, LocationId, MajorMultimediaType, BaseDurationTicks) VALUES (?, ?, ?, ?)", (new_playlist_item_id, new_location_id, major_multimedia_type, base_duration_ticks))
+                    print(f"New values for PlaylistItemId: {new_playlist_item_id} and LocationId: {new_location_id}")
+                    update_database(db_path, "PlaylistItemId", playlist_item_id, new_playlist_item_id)
+                    update_database(db_path, "LocationId", location_id, new_location_id)
+                    merged_cursor.execute("INSERT INTO PlaylistItemLocationMap (PlaylistItemId, LocationId, MajorMultimediaType, BaseDurationTicks) VALUES (?, ?, ?, ?)", (new_playlist_item_id, new_location_id, major_multimedia_type, base_duration_ticks))
 
-                    # merge_record_by_location_id(pasta_db, pasta_mesclada, new_location_id)
-                    
-                    conn_mesclado.commit()
+                    merged_conn.commit()
 
             cursor.close()
             conn.close()
+            print(f"Table 'PlaylistItemLocationMap' merged successfully in {db_file}!")
 
-    cursor_mesclado.close()
-    conn_mesclado.close()
-    print(">>>>>>Tabela 'PlaylistItemLocationMap' mesclada com sucesso!")
+    merged_cursor.close()
+    merged_conn.close()

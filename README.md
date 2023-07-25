@@ -1,13 +1,24 @@
+# JWlibrary Sign Language Merger
 
-# Aplicativo de Mesclagem de Arquivos .jwlibrary
-Este aplicativo Python permite mesclar arquivos .jwlibrary em um único arquivo para facilitar o gerenciamento e compartilhamento de dados. Para utilizar o aplicativo, basta ter o Python 3 instalado em sua máquina e seguir as instruções abaixo:
+The Playlist Merger is a Python script that allows you to merge multiple playlist files into a single file. It takes all the playlist files in the root directory and combines them into one file, making it convenient to manage and share playlists.
 
-## Instruções de Uso:
-Coloque os arquivos .jwlibrary que deseja mesclar na raiz do aplicativo.
+## Usage
+1. Place all the playlist files you want to merge in the root directory of the script.
+2. Run the main.py script:
+```
+python main.py
+```
+3. The script will create a new directory and store the merged playlist inside it.
+Additionally, a ZIP archive named "merged_playlists.jwlibrary" containing the merged playlist file will be created.
 
-Execute o arquivo main.py.
+## Requirements
+Python 3.x
 
-O aplicativo irá detectar automaticamente os arquivos .jwlibrary presentes na pasta e iniciará o processo de mesclagem.
+## Supported Playlist Format
+The script currently supports playlists in format with a ".jwlibrary" extension. If your playlists are in a different format, you may need to adjust the script accordingly.
 
-Após a conclusão da mesclagem, um novo arquivo .jwlibrary será gerado na pasta "merged".
+## License
+This project is licensed under the MIT License.
 
+## Contributing
+Contributions are welcome! If you have any bug fixes or enhancements, feel free to create a pull request.

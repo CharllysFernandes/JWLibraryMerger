@@ -4,44 +4,44 @@ from datetime import datetime, timezone
 
 def update_last_modified(database_path):
     """
-    Atualiza a coluna "LastModified" na tabela "LastModified" do banco de dados com a data e hora atual em formato ISO (UTC).
+    Update the "LastModified" column in the "LastModified" table of the database with the current date and time in ISO format (UTC).
 
-    Esta função recebe o caminho para o banco de dados mesclado e realiza o seguinte:
-    - Conecta-se ao banco de dados.
-    - Obtém a data e hora atual no fuso horário UTC.
-    - Formata a data e hora no formato "2023-06-21T21:37:13Z".
-    - Faz o update do valor na coluna "LastModified" da tabela "LastModified".
+    This function takes the path to the merged database and performs the following steps:
+    - Connects to the database.
+    - Gets the current date and time in UTC timezone.
+    - Formats the date and time in the "2023-06-21T21:37:13Z" format.
+    - Updates the value in the "LastModified" column of the "LastModified" table.
 
-    Parâmetros:
-        database_path (str): Caminho para o banco de dados mesclado contendo a tabela "LastModified".
+    Parameters:
+        database_path (str): Path to the merged database containing the "LastModified" table.
 
-    Retorna:
-        Nada. A função apenas atualiza o valor da coluna "LastModified" no banco de dados.
+    Returns:
+        None. The function only updates the value of the "LastModified" column in the database.
     """
-    # Caminho completo para o arquivo de banco de dados
-    caminho_db_mesclado = os.path.join(database_path, "userData.db")
+    # Full path to the database file
+    merged_db_path = os.path.join(database_path, "userData.db")
 
-    # Conecta-se ao banco de dados
-    conn_mesclado = sqlite3.connect(caminho_db_mesclado)
-    cursor_mesclado = conn_mesclado.cursor()
+    # Connect to the database
+    conn = sqlite3.connect(merged_db_path)
+    cursor = conn.cursor()
 
     try:
-        # Obtém a data e hora atual no formato ISO (UTC)
+        # Get the current date and time in ISO format (UTC)
         current_datetime = datetime.now(timezone.utc)
 
-        # Formata a data e hora no formato "2023-06-21T21:37:13Z"
+        # Format the date and time in the "2023-06-21T21:37:13Z" format
         new_last_modified = current_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # Update the LastModified value in the table
-        cursor_mesclado.execute("UPDATE LastModified SET LastModified = ?", (new_last_modified,))
-        conn_mesclado.commit()
+        cursor.execute("UPDATE LastModified SET LastModified = ?", (new_last_modified,))
+        conn.commit()
 
-        print("Update da tabela LastModified realizado com sucesso.")
+        print("LastModified table update successful.")
 
     except sqlite3.Error as e:
-        print(f"Erro ao atualizar a tabela LastModified: {e}")
+        print(f"Error updating the LastModified table: {e}")
 
     finally:
         # Close the connection with the database
-        cursor_mesclado.close()
-        conn_mesclado.close()
+        cursor.close()
+        conn.close()
