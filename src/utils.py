@@ -1,12 +1,12 @@
 import random
 import os
 
-def count_db(pasta):
+def count_db(folder):
     """
     Conta a quantidade de arquivos de banco de dados (.db) encontrados na pasta especificada.
 
     Parâmetros:
-        pasta (str): O caminho para a pasta a ser verificada.
+        folder (str): O caminho para a pasta a ser verificada.
 
     Retorno:
         count (int): O número de arquivos de banco de dados (.db) encontrados na pasta.
@@ -18,8 +18,8 @@ def count_db(pasta):
     """
 
     count = 0
-    for arquivo in os.listdir(pasta):
-        if arquivo.endswith(".db"):
+    for file in os.listdir(folder):
+        if file.endswith(".db"):
             count += 1
     return count
 
